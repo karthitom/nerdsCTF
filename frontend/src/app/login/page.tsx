@@ -32,7 +32,7 @@ export default function Login() {
         try {
             await login(email, password);
         } catch (err: any) {
-            setErrorMsg(err.response?.data?.error || 'Authentication failed. Please verify credentials.');
+            setErrorMsg(err.message || 'Authentication failed. Please verify credentials.');
         } finally {
             setIsSubmitting(false);
         }

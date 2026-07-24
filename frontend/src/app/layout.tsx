@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Navigation from "@/components/Navigation";
-import FirebaseProvider from "@/components/FirebaseProvider";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -21,16 +20,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.className} min-h-screen flex flex-col bg-background text-foreground antialiased selection:bg-purple-500/30`}>
-        <FirebaseProvider>
-          <AuthProvider>
-            <div className="fixed inset-0 z-0 matrix-dots opacity-30 pointer-events-none"></div>
-            <Navigation />
-            <Toaster position="bottom-right" toastOptions={{ style: { background: '#111', color: '#fff', border: '1px solid #333' } }} />
-            <main className="flex-1 flex flex-col z-10 relative">
-              {children}
-            </main>
-          </AuthProvider>
-        </FirebaseProvider>
+        <AuthProvider>
+          <div className="fixed inset-0 z-0 matrix-dots opacity-30 pointer-events-none"></div>
+          <Navigation />
+          <Toaster position="bottom-right" toastOptions={{ style: { background: '#111', color: '#fff', border: '1px solid #333' } }} />
+          <main className="flex-1 flex flex-col z-10 relative">
+            {children}
+          </main>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 import { UserPlus, Mail, KeyRound, User, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
 
 export default function Register() {
-    const { user } = useAuth();
+    const { user, register } = useAuth() as any;
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
@@ -30,18 +30,16 @@ export default function Register() {
         setIsSubmitting(true);
 
         try {
-            const response = await api.post('/auth/register', { email, username, password });
-            if (response.data?.success) {
-                setSuccessMsg(response.data.message || 'Operator Profile initialized! Redirecting to auth node...');
-                setEmail('');
-                setUsername('');
-                setPassword('');
-                setTimeout(() => {
-                    router.push('/login');
-                }, 2000);
-            }
+            await register(email, password, username);
+            setSuccessMsg('Operator Profile initialized! Redirecting to auth node...');
+            setEmail('');
+            setUsername('');
+            setPassword('');
+            setTimeout(() => {
+                router.push('/login');
+            }, 2000);
         } catch (err: any) {
-            setErrorMsg(err.response?.data?.error || 'Registration failed. Check parameters and try again.');
+            setErrorMsg(err.message || 'Registration failed. Check parameters and try again.');
         } finally {
             setIsSubmitting(false);
         }
