@@ -3,7 +3,7 @@ import { TokenService } from '../../infrastructure/security/token.service';
 
 export interface AuthenticatedRequest extends Request {
     user?: {
-        userId: number;
+        userId: string;
         username: string;
         role: string;
         permissions: string[];

@@ -23,7 +23,13 @@ app.use(helmet({
 }));
 
 // CORS Configuration
-const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:3000'];
+const allowedOrigins = [
+    process.env.FRONTEND_URL, 
+    'http://localhost:3000', 
+    'http://localhost:5173', 
+    'https://nerdsctf.web.app',
+    'https://nerdsctf.firebaseapp.com'
+].filter(Boolean) as string[];
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {

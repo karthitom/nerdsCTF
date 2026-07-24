@@ -1,102 +1,98 @@
 @import "tailwindcss";
 
 :root {
-  --background: #080b11;
-  --foreground: #f8fafc;
-  --card-bg: rgba(17, 24, 39, 0.7);
-  --border-glow: rgba(6, 182, 212, 0.2);
-  --cyan-glow: 0 0 10px rgba(6, 182, 212, 0.4), 0 0 20px rgba(6, 182, 212, 0.2);
-  --purple-glow: 0 0 10px rgba(217, 70, 239, 0.4), 0 0 20px rgba(217, 70, 239, 0.2);
+  --background: #000000;
+  --foreground: #ededed;
+  --card-bg: rgba(10, 10, 10, 0.7);
+  --border-glow: rgba(255, 255, 255, 0.1);
+  --cyan-glow: 0 0 20px rgba(6, 182, 212, 0.15);
+  --purple-glow: 0 0 20px rgba(139, 92, 246, 0.15);
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Courier New', Courier, monospace, system-ui;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Glassmorphism utility */
+/* Glassmorphism utility - Linear style */
 .glass-panel {
-  background: rgba(17, 24, 39, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.glass-panel-hover {
+  transition: all 0.2s ease-out;
 }
 
 .glass-panel-hover:hover {
-  border-color: rgba(6, 182, 212, 0.4);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
-/* Cyber elements */
-.cyber-glow-cyan {
-  text-shadow: var(--cyan-glow);
+/* Premium Gradients */
+.text-gradient {
+  background: linear-gradient(to right, #fff, #a1a1aa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.cyber-glow-purple {
-  text-shadow: var(--purple-glow);
+.text-gradient-purple {
+  background: linear-gradient(to right, #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.cyber-btn-cyan {
-  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
-  border: 1px solid rgba(6, 182, 212, 0.6);
-  color: white;
-  transition: all 0.3s ease;
+/* Buttons */
+.cyber-btn-cyan, .cyber-btn-purple {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px 0 rgba(255, 255, 255, 0.1);
 }
 
-.cyber-btn-cyan:hover {
-  box-shadow: 0 0 25px rgba(6, 182, 212, 0.7);
+.cyber-btn-cyan:hover, .cyber-btn-purple:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
 }
 
-.cyber-btn-purple {
-  background: linear-gradient(135deg, #d946ef 0%, #8b5cf6 100%);
-  box-shadow: 0 0 15px rgba(217, 70, 239, 0.4);
-  border: 1px solid rgba(217, 70, 239, 0.6);
-  color: white;
-  transition: all 0.3s ease;
-}
-
-.cyber-btn-purple:hover {
-  box-shadow: 0 0 25px rgba(217, 70, 239, 0.7);
-  transform: translateY(-1px);
-}
-
-/* Custom Scrollbar */
+/* Custom Scrollbar - Minimal */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #080b11;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #06b6d4;
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Matrix Background animation keyframe */
-@keyframes cyber-pulse {
-  0%, 100% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 0.5;
-  }
+/* Background animation */
+@keyframes pulse-opacity {
+  0%, 100% { opacity: 0.05; }
+  50% { opacity: 0.15; }
 }
 
 .matrix-dots {
-  background-image: radial-gradient(rgba(6, 182, 212, 0.15) 1px, transparent 0);
-  background-size: 24px 24px;
-  animation: cyber-pulse 4s infinite ease-in-out;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+  background-size: 32px 32px;
+  animation: pulse-opacity 8s infinite ease-in-out;
 }

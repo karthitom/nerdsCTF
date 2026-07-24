@@ -1,31 +1,6 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: nerdctf-db
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: nerdctf
-      MYSQL_USER: ctfuser
-      MYSQL_PASSWORD: ctfpassword
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-    networks:
-      - nerdctf-network
-
-  redis:
-    image: redis:alpine
-    container_name: nerdctf-cache
-    restart: always
-    ports:
-      - "6379:6379"
-    networks:
-      - nerdctf-network
-
   backend:
     build:
       context: ./backend
@@ -34,18 +9,16 @@ services:
     restart: always
     environment:
       - PORT=5000
-      - DATABASE_URL=mysql://ctfuser:ctfpassword@mysql:3306/nerdctf
-      - REDIS_URL=redis://redis:6379
       - JWT_ACCESS_SECRET=access_token_super_secret_key_12345
       - JWT_REFRESH_SECRET=refresh_token_super_secret_key_67890
       - FRONTEND_URL=http://localhost:3000
       - COOKIE_DOMAIN=localhost
       - NODE_ENV=production
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
     ports:
       - "5000:5000"
-    depends_on:
-      - mysql
-      - redis
     networks:
       - nerdctf-network
 
@@ -119,9 +92,6 @@ services:
       - "8005:80"
     networks:
       - nerdctf-network
-
-volumes:
-  mysql-data:
 
 networks:
   nerdctf-network:

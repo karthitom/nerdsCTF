@@ -1,9 +1,8 @@
 import * as jwt from 'jsonwebtoken';
 import { Logger } from '../logging/logger';
-import { RedisService } from '../cache/redis.service';
 
 export interface TokenPayload {
-    userId: number;
+    userId: string;
     username: string;
     role: string;
     permissions: string[];
@@ -17,7 +16,7 @@ export class TokenService {
         return jwt.sign(payload, this.accessSecret, { expiresIn: '15m' });
     }
 
-    static generateRefreshToken(payload: { userId: number }): string {
+    static generateRefreshToken(payload: { userId: string }): string {
         return jwt.sign(payload, this.refreshSecret, { expiresIn: '7d' });
     }
 
@@ -29,21 +28,11 @@ export class TokenService {
         }
     }
 
-    static verifyRefreshToken(token: string): { userId: number } | null {
+    static verifyRefreshToken(token: string): { userId: string } | null {
         try {
-            return jwt.verify(token, this.refreshSecret) as { userId: number };
+            return jwt.verify(token, this.refreshSecret) as { userId: string };
         } catch (error) {
             return null;
         }
-    }
-
-    static async blacklistToken(token: string, expirySeconds: number): Promise<void> {
-        // Blacklist old refresh token in Redis
-        await RedisService.set(`blacklist:${token}`, '1', expirySeconds);
-    }
-
-    static async isBlacklisted(token: string): Promise<boolean> {
-        const result = await RedisService.get(`blacklist:${token}`);
-        return result !== null;
     }
 }

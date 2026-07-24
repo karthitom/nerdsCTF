@@ -7,6 +7,11 @@
 
 # Environment
 .env
+.env.*
+.env.local
+
+# Firebase Service Account (NEVER commit this!)
+*firebase-adminsdk*.json
 
 # Build
 build/

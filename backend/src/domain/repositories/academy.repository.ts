@@ -1,8 +1,48 @@
-import { AcademyTopic, Lesson, Progress, Quiz } from '@prisma/client';
+// Plain TypeScript domain types — no Prisma dependency
+
+export interface QuizDoc {
+    id: string;
+    lessonId: string;
+    question: string;
+    optionsJson: string;
+    correctOption: string;
+}
+
+export interface LessonSummary {
+    id: string;
+    title: string;
+    orderIndex: number;
+}
+
+export interface AcademyTopicDoc {
+    id: string;
+    title: string;
+    description?: string;
+    orderIndex: number;
+    lessons: LessonSummary[];
+}
+
+export interface LessonDoc {
+    id: string;
+    topicId: string;
+    topic: AcademyTopicDoc;
+    title: string;
+    contentMarkdown: string;
+    orderIndex: number;
+    quizzes: QuizDoc[];
+}
+
+export interface ProgressDoc {
+    id: string;
+    userId: string;
+    lessonId: string;
+    isCompleted: boolean;
+    completedAt: Date;
+}
 
 export interface IAcademyRepository {
-    findAllTopics(): Promise<(AcademyTopic & { lessons: { id: number; title: string; orderIndex: number }[] })[]>;
-    findLessonById(id: number): Promise<(Lesson & { topic: AcademyTopic; quizzes: Quiz[] }) | null>;
-    saveProgress(userId: number, lessonId: number, isCompleted: boolean): Promise<Progress>;
-    getUserProgress(userId: number): Promise<Progress[]>;
+    findAllTopics(): Promise<AcademyTopicDoc[]>;
+    findLessonById(id: string): Promise<LessonDoc | null>;
+    saveProgress(userId: string, lessonId: string, isCompleted: boolean): Promise<ProgressDoc>;
+    getUserProgress(userId: string): Promise<ProgressDoc[]>;
 }

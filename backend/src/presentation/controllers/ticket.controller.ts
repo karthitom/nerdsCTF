@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
-import { PrismaService } from '../../infrastructure/database/prisma.service';
+import { FirebaseService } from '../../infrastructure/firebase/firebase.service';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 
-const prisma = PrismaService.getInstance();
+function db() {
+    return FirebaseService.db();
+}
 
 export class TicketController {
     static async createTicket(req: AuthenticatedRequest, res: Response) {
@@ -14,28 +16,31 @@ export class TicketController {
         }
 
         try {
-            const ticket = await prisma.supportTicket.create({
-                data: {
-                    userId: req.user.userId,
-                    title,
-                    description,
-                    priority: priority || 'LOW'
-                }
-            });
+            const now = new Date();
+            const ref = db().collection('supportTickets').doc();
+            const ticketData = {
+                userId: req.user.userId,
+                title,
+                description,
+                priority: priority || 'LOW',
+                status: 'OPEN',
+                createdAt: now,
+                updatedAt: now,
+            };
+            await ref.set(ticketData);
 
-            await prisma.auditLog.create({
-                data: {
-                    userId: req.user.userId,
-                    action: 'CREATE_TICKET',
-                    details: `Created support ticket ID ${ticket.id} (${title})`,
-                    ipAddress: req.ip
-                }
+            await db().collection('auditLogs').add({
+                userId: req.user.userId,
+                action: 'CREATE_TICKET',
+                details: `Created support ticket (${title})`,
+                ipAddress: req.ip,
+                createdAt: now,
             });
 
             return res.status(201).json({
                 success: true,
-                ticket,
-                message: 'Support ticket submitted successfully.'
+                ticket: { id: ref.id, ...ticketData },
+                message: 'Support ticket submitted successfully.',
             });
         } catch (error: any) {
             return res.status(500).json({ success: false, error: 'Failed to create support ticket.' });
@@ -46,10 +51,19 @@ export class TicketController {
         if (!req.user) return res.status(401).json({ success: false, error: 'Unauthorized' });
 
         try {
-            const tickets = await prisma.supportTicket.findMany({
-                where: { userId: req.user.userId },
-                orderBy: { createdAt: 'desc' }
-            });
+            const q = await db()
+                .collection('supportTickets')
+                .where('userId', '==', req.user.userId)
+                .orderBy('createdAt', 'desc')
+                .get();
+
+            const tickets = q.docs.map((snap) => ({
+                id: snap.id,
+                ...snap.data(),
+                createdAt: snap.data().createdAt?.toDate(),
+                updatedAt: snap.data().updatedAt?.toDate(),
+            }));
+
             return res.json({ success: true, tickets });
         } catch (error: any) {
             return res.status(500).json({ success: false, error: 'Failed to retrieve support tickets.' });
@@ -57,7 +71,6 @@ export class TicketController {
     }
 
     static async submitFeedback(req: Request, res: Response) {
-        // Feedback does not strictly require auth, allows site guests or users to submit
         const { name, email, messageType, feedbackText } = req.body;
 
         if (!name || !email || !messageType || !feedbackText) {
@@ -65,19 +78,20 @@ export class TicketController {
         }
 
         try {
-            const feedback = await prisma.feedback.create({
-                data: {
-                    name,
-                    email,
-                    messageType,
-                    feedbackText
-                }
-            });
+            const ref = db().collection('feedback').doc();
+            const feedbackData = {
+                name,
+                email,
+                messageType,
+                feedbackText,
+                createdAt: new Date(),
+            };
+            await ref.set(feedbackData);
 
             return res.status(201).json({
                 success: true,
-                feedback,
-                message: 'Feedback received. Thank you for making nerdCTF better!'
+                feedback: { id: ref.id, ...feedbackData },
+                message: 'Feedback received. Thank you for making nerdCTF better!',
             });
         } catch (error: any) {
             return res.status(500).json({ success: false, error: 'Failed to record feedback.' });
