@@ -1,0 +1,15 @@
+{
+  "name": "lab-04-idor-advanced",
+  "version": "1.0.0",
+  "description": "NerdCTF Lab 4 - IDOR Advanced",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cookie-parser": "^1.4.6",
+    "uuid": "^9.0.0",
+    "sqlite3": "^5.1.6"
+  }
+}

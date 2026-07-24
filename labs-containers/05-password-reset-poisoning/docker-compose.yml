@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  password-reset-poisoning-lab:
+    build: .
+    ports:
+      - "8005:8000"
+    environment:
+      - PORT=8000
+      - FLAG=nerdCTF{host_header_poisoning_pwned}
+    restart: always

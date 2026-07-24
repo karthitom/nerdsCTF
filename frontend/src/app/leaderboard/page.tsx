@@ -23,10 +23,42 @@ export default function Leaderboard() {
         if (!user) return;
         const fetchLeaderboard = async () => {
             try {
-                const response = await api.get('/leaderboard');
-                if (response.data?.success) {
-                    setBoard(response.data.leaderboard || []);
-                }
+                // @ts-ignore
+                const { createClient } = await import('@/utils/supabase/client');
+                const supabase = createClient();
+
+                const { data: profiles, error: profError } = await supabase
+                    .from('profiles')
+                    .select('id, username, avatar, country');
+                    
+                if (profError) throw profError;
+
+                const { data: solves, error: solvesError } = await supabase
+                    .from('solves')
+                    .select('user_id, challenge_id, challenges(points)');
+
+                if (solvesError) throw solvesError;
+
+                const userPoints: Record<string, number> = {};
+                const userSolves: Record<string, number> = {};
+                
+                solves.forEach((solve: any) => {
+                    const points = solve.challenges?.points || 0;
+                    userPoints[solve.user_id] = (userPoints[solve.user_id] || 0) + points;
+                    userSolves[solve.user_id] = (userSolves[solve.user_id] || 0) + 1;
+                });
+
+                const formattedBoard = (profiles || []).map((p: any) => ({
+                    id: p.id,
+                    username: p.username,
+                    avatar: p.avatar,
+                    country: p.country || 'N/A',
+                    points: userPoints[p.id] || 0,
+                    solvedLabs: userSolves[p.id] || 0,
+                    streak: 0
+                })).sort((a: any, b: any) => b.points - a.points);
+                
+                setBoard(formattedBoard);
             } catch (error) {
                 console.error("Error loading scoreboard", error);
             } finally {

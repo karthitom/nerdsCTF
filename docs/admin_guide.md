@@ -6,7 +6,7 @@ This guide instructs platform administrators on how to moderate players, inspect
 
 ## 1. Accessing Admin Panel
 1. Authenticate with administrative credentials:
-   - Default Email: `admin@nerdctf.io`
+   - Default Email: `admin@nerdsctf.io`
    - Default Password: `NerdCTFAdminPass123!`
 2. Upon login, you will see the **Admin** link in the navigation header. Select this link to open the panel dashboard.
 

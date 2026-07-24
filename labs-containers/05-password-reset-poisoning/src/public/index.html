@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Login</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; color: #1a202c; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 320px; text-align: center; }
+        input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e0; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #4299e1; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        button:hover { background: #3182ce; }
+        .secondary { background: transparent; border: 1px solid #4299e1; color: #4299e1; }
+        .secondary:hover { background: #ebf8ff; }
+        #msg { margin-top: 15px; font-size: 14px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="box" id="loginBox">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button id="loginBtn">Log In</button>
+    <button class="secondary" id="showForgotBtn">Forgot Password?</button>
+    <div id="loginMsg" id="msg"></div>
+</div>
+
+<div class="box hidden" id="forgotBox">
+    <h2>Reset Password</h2>
+    <input type="text" id="resetUsername" placeholder="Username">
+    <button id="forgotBtn">Send Reset Link</button>
+    <button class="secondary" id="backBtn">Back to Login</button>
+    <div id="forgotMsg" id="msg"></div>
+</div>
+
+<div class="box hidden" id="profileBox">
+    <h2>My Profile</h2>
+    <p id="profName"></p>
+    <p id="profSecret" style="background: #fed7d7; padding: 10px; border-radius: 4px; font-family: monospace;"></p>
+</div>
+
+<script>
+    document.getElementById('showForgotBtn').onclick = () => {
+        document.getElementById('loginBox').classList.add('hidden');
+        document.getElementById('forgotBox').classList.remove('hidden');
+    };
+
+    document.getElementById('backBtn').onclick = () => {
+        document.getElementById('forgotBox').classList.add('hidden');
+        document.getElementById('loginBox').classList.remove('hidden');
+    };
+
+    document.getElementById('loginBtn').onclick = async () => {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+        const res = await fetch('/api/login', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: u, password: p})
+        });
+        const data = await res.json();
+        if (res.ok) {
+            document.getElementById('loginBox').classList.add('hidden');
+            document.getElementById('profileBox').classList.remove('hidden');
+            
+            const profRes = await fetch('/api/profile');
+            const profData = await profRes.json();
+            document.getElementById('profName').innerText = "Logged in as: " + profData.username;
+            document.getElementById('profSecret').innerText = "Secret: " + profData.secret;
+        } else {
+            document.getElementById('loginMsg').innerText = data.error;
+            document.getElementById('loginMsg').style.color = 'red';
+        }
+    };
+
+    document.getElementById('forgotBtn').onclick = async () => {
+        const u = document.getElementById('resetUsername').value;
+        const res = await fetch('/api/forgot-password', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: u})
+        });
+        const data = await res.json();
+        document.getElementById('forgotMsg').innerText = data.message;
+        document.getElementById('forgotMsg').style.color = 'green';
+    };
+</script>
+
+</body>
+</html>

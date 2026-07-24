@@ -1,0 +1,1 @@
+nerdCTF{bruteforce_m4st3r_9921}

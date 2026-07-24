@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Portal - Login</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #0a0a0a;
+            color: #00ff00;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background-color: #111;
+            padding: 30px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+            width: 300px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #888;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            background-color: #222;
+            border: 1px solid #444;
+            color: #00ff00;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #00ff00;
+            color: #000;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #00cc00;
+        }
+        #message {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .error { color: #ff3333; }
+        .success { color: #33cc33; }
+        .flag-box {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #002200;
+            border: 1px dashed #00ff00;
+            word-break: break-all;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>EMPLOYEE PORTAL</h2>
+    <div class="input-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter username">
+    </div>
+    <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password">
+    </div>
+    <button id="loginBtn">AUTHENTICATE</button>
+    <div id="message"></div>
+    <div id="flagBox" class="flag-box"></div>
+</div>
+
+<script>
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const msgDiv = document.getElementById('message');
+        const flagBox = document.getElementById('flagBox');
+
+        msgDiv.className = '';
+        msgDiv.textContent = 'Authenticating...';
+        flagBox.style.display = 'none';
+
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                msgDiv.className = 'success';
+                msgDiv.textContent = data.message;
+                
+                if (data.flag) {
+                    flagBox.textContent = 'FLAG: ' + data.flag;
+                    flagBox.style.display = 'block';
+                }
+            } else {
+                msgDiv.className = 'error';
+                msgDiv.textContent = data.error || 'Login failed';
+            }
+        } catch (err) {
+            msgDiv.className = 'error';
+            msgDiv.textContent = 'Connection error';
+        }
+    });
+</script>
+</body>
+</html>

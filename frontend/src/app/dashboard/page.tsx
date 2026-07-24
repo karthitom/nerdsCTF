@@ -33,18 +33,32 @@ export default function Dashboard() {
 
         const fetchDashboardData = async () => {
             try {
-                const chalRes = await api.get('/challenges');
-                const challenges = chalRes.data.challenges || [];
-                const solved = challenges.filter((c: any) => c.solved);
-                const score = solved.reduce((sum: number, c: any) => sum + c.points, 0);
+                // @ts-ignore
+                const { createClient } = await import('@/utils/supabase/client');
+                const supabase = createClient();
+
+                // Fetch all challenges
+                const { data: challenges, error: chalError } = await supabase.from('challenges').select('*');
+                if (chalError) throw chalError;
+
+                // Fetch user solves
+                const { data: solves, error: solvesError } = await supabase
+                    .from('solves')
+                    .select('challenge_id, solved_at')
+                    .eq('user_id', user.id);
+                if (solvesError) throw solvesError;
+
+                const solvedIds = new Set(solves?.map((s: any) => s.challenge_id));
+                const solvedChallenges = (challenges || []).filter((c: any) => solvedIds.has(c.id));
+                const score = solvedChallenges.reduce((sum: number, c: any) => sum + c.points, 0);
 
                 const categoryMap: { [key: string]: { solved: number; total: number } } = {};
-                challenges.forEach((c: any) => {
+                (challenges || []).forEach((c: any) => {
                     if (!categoryMap[c.category]) {
                         categoryMap[c.category] = { solved: 0, total: 0 };
                     }
                     categoryMap[c.category].total += 1;
-                    if (c.solved) {
+                    if (solvedIds.has(c.id)) {
                         categoryMap[c.category].solved += 1;
                     }
                 });
@@ -55,28 +69,39 @@ export default function Dashboard() {
                     total: categoryMap[cat].total
                 }));
 
-                const leadRes = await api.get('/leaderboard');
-                const leaderboard = leadRes.data.leaderboard || [];
-                const myRankIndex = leaderboard.findIndex((item: any) => item.username === user.username);
-                const currentRank = myRankIndex !== -1 ? myRankIndex + 1 : leaderboard.length + 1;
+                // For rank, we just fetch all profiles and solves to calculate rank locally (or just mock it for now since leaderboard page does the heavy lifting)
+                const { data: allSolves } = await supabase.from('solves').select('user_id, challenges(points)');
+                const userPoints: Record<string, number> = {};
+                (allSolves || []).forEach((s: any) => {
+                    const pts = s.challenges?.points || 0;
+                    userPoints[s.user_id] = (userPoints[s.user_id] || 0) + pts;
+                });
+                
+                const sortedRanks = Object.entries(userPoints).sort((a: any, b: any) => b[1] - a[1]);
+                const myRankIndex = sortedRanks.findIndex(r => r[0] === user.id);
+                // If they have 0 points, they might not be in sortedRanks
+                const currentRank = myRankIndex !== -1 ? myRankIndex + 1 : sortedRanks.length + 1;
 
                 const mockBadges = [
-                    { id: 1, name: 'First Blood', desc: 'Solved your first challenge successfully', icon: '🩸', unlocked: solved.length > 0 },
+                    { id: 1, name: 'First Blood', desc: 'Solved your first challenge successfully', icon: '🩸', unlocked: solvedChallenges.length > 0 },
                     { id: 2, name: 'Elite Hacker', desc: 'Reach 500 total points', icon: '🚀', unlocked: score >= 500 },
-                    { id: 3, name: 'Academy Scholar', desc: 'Complete all fundamental lessons', icon: '🎓', unlocked: solved.length > 2 }
+                    { id: 3, name: 'Academy Scholar', desc: 'Complete all fundamental lessons', icon: '🎓', unlocked: solvedChallenges.length > 2 }
                 ];
 
-                const mockLogs = solved.map((s: any, idx: number) => ({
-                    id: idx,
-                    action: 'CHALLENGE_SOLVED',
-                    details: `Successfully completed challenge: ${s.title}`,
-                    createdAt: new Date().toLocaleDateString()
-                }));
+                const mockLogs = solvedChallenges.map((s: any, idx: number) => {
+                    const solveRecord = solves?.find((sr: any) => sr.challenge_id === s.id);
+                    return {
+                        id: idx,
+                        action: 'CHALLENGE_SOLVED',
+                        details: `Successfully completed challenge: ${s.title}`,
+                        createdAt: solveRecord?.solved_at ? new Date(solveRecord.solved_at).toLocaleDateString() : new Date().toLocaleDateString()
+                    };
+                });
 
                 setStats({
                     totalScore: score,
-                    solvedCount: solved.length,
-                    totalLabs: challenges.length,
+                    solvedCount: solvedChallenges.length,
+                    totalLabs: challenges?.length || 0,
                     rank: currentRank,
                     badges: mockBadges.filter(b => b.unlocked),
                     categoryProgress: chartData.filter(d => d.value > 0)

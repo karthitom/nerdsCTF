@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  broken-login-lab:
+    build: .
+    ports:
+      - "8001:8000"
+    environment:
+      - PORT=8000
+      # Dynamic flag injection point for the orchestrator
+      - FLAG=nerdCTF{bruteforce_m4st3r_9921}
+    restart: always
