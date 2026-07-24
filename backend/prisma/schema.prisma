@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -55,8 +55,8 @@ model Challenge {
   id            Int          @id @default(autoincrement())
   title         String
   difficulty    String       // Easy, Medium, Hard
-  description   String       
-  objectives    String       
+  description   String       @db.Text
+  objectives    String       @db.Text
   categoryId    Int          @map("category_id")
   category      Category     @relation(fields: [categoryId], references: [id])
   points        Int
@@ -131,7 +131,7 @@ model Lesson {
   topicId         Int          @map("topic_id")
   topic           AcademyTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
   title           String
-  contentMarkdown String       @map("content_markdown")
+  contentMarkdown String       @map("content_markdown") @db.Text
   orderIndex      Int          @map("order_index")
   progresses      Progress[]
   quizzes         Quiz[]
@@ -156,8 +156,8 @@ model Quiz {
   id            Int    @id @default(autoincrement())
   lessonId      Int    @map("lesson_id")
   lesson        Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  question      String 
-  optionsJson   String @map("options_json") // JSON array of options
+  question      String       @db.Text
+  optionsJson   String @map("options_json") @db.Text // JSON array of options
   correctOption String @map("correct_option") // correct option text
 
   @@map("quizzes")
